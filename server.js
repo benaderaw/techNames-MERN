@@ -1,11 +1,19 @@
 const express = require("express");
 const path = require("path");
 const rootRoute = require("./routes/root");
+const { logger } = require("./middleware/logger");
+const errorhandler = require("./middleware/errorHandler");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const corsOptions = require("./config/corsOptions");
 
 const app = express();
 
-// parse json body
-app.use(express.json());
+app.use(logger);
+app.use(cors(corsOptions)); // middleware that can be used to enable CORS with various options
+
+app.use(express.json()); // parse json body
+app.use(cookieParser()); // parse cookie
 
 // telling express where to find static files like css or img
 app.use("/", express.static(path.join(__dirname, "public")));
@@ -30,8 +38,11 @@ app.all("*", (req, res) => {
   res.type("txt").send("404 Not Found");
 });
 
+// handel error middleware
+app.use(errorhandler);
+
 // start server
 const PORT = process.env.PORT || 3500;
 app.listen(PORT, () => {
-  console.log(`started listening on ${PORT}...`);
+  console.log(`🟢 started server on port ${PORT}...`);
 });
