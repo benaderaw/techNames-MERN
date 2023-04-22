@@ -6,6 +6,8 @@ const errorhandler = require("./middleware/errorHandler");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
+const { DB_USERNAME, DB_PASSWORD, DATABASE } = require("./config/config");
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -41,8 +43,26 @@ app.all("*", (req, res) => {
 // handel error middleware
 app.use(errorhandler);
 
+// connect to database
+
+const DB = DATABASE.replace("<password>", DB_PASSWORD);
+
+mongoose
+  .connect(DB)
+  .then(() => {
+    console.log("🟢 DB connection successful 🟢");
+  })
+  .catch((err) => {
+    console.log(`🔴 DB failed to connect: ${err.message} 🔴`);
+  });
+
 // start server
 const PORT = process.env.PORT || 3500;
 app.listen(PORT, () => {
   console.log(`🟢 started server on port ${PORT}...`);
 });
+
+// useNewUrlParser: true,
+//     // useCreateIndex: true,
+//     // useFindAndModify: false,
+//     useUnifiedTopology: true,
